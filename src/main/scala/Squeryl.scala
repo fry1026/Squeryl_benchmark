@@ -60,12 +60,12 @@ import SquerylConfiguration._
 import Benchmarking._
 
 object SquerylBenchMark extends App {
-  Class.forName("org.h2.Driver")
-  // Class.forName("org.postgresql.Driver")
+  //Class.forName("org.h2.Driver")
+  Class.forName("org.postgresql.Driver")
   SessionFactory.concreteFactory = Some(() =>
     Session.create(
-      java.sql.DriverManager.getConnection("jdbc:h2:~/~.h2.db", "sa", ""), new H2Adapter)
-    // java.sql.DriverManager.getConnection("jdbc:postgresql://localhost:5432/benchmarking", "postgres", "postgres"), new PostgreSqlAdapter)
+    //java.sql.DriverManager.getConnection("jdbc:h2:~/~.h2.db", "sa", ""), new H2Adapter)
+    java.sql.DriverManager.getConnection("jdbc:postgresql://localhost:5432/benchmarking", "postgres", "postgres"), new PostgreSqlAdapter)
   )
   1 to 5 foreach { _ =>
     // Benchmarking insert
@@ -96,10 +96,10 @@ object SquerylBenchMark extends App {
     }
 
     inTransaction {
+      println(s"Number of authors in database: ${from(books)(select(_)).size}")
       time("select statements", {
         1 to 100 foreach { n =>
           val jrrt = authors.where(_.lastName === s"Tolkien$n").head
-          from(authors)(select(_)).size
           jrrt.books.map(_.title).mkString(",")
           authors.map(_.full_name).mkString(",")
           books.filter(_.title.contains("Dark")).map(_.title).mkString(",")
