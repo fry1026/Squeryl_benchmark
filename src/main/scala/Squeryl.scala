@@ -67,16 +67,16 @@ object SquerylBenchMark extends App {
     //java.sql.DriverManager.getConnection("jdbc:h2:~/~.h2.db", "sa", ""), new H2Adapter)
     java.sql.DriverManager.getConnection("jdbc:postgresql://localhost:5432/benchmarking", "postgres", "postgres"), new PostgreSqlAdapter)
   )
-  1 to 5 foreach { _ =>
+  1 to 2 foreach { _ =>
     // Benchmarking insert
     inTransaction {
       time("insert statements", {
-        1 to 100 foreach { n =>
+        1 to 1000 foreach { n =>
           val jrrt = authors.insert(new Author("JRR", s"Tolkien$n"))
           authors.insert(new Author("Jane", "Austen"))
           authors.insert(new Author("Philip", "Pullman", None, Some( """ <xml>Test</xml> """)))
         }
-        1 to 100 foreach { n =>
+        1 to 1000 foreach { n =>
           val jrrt = authors.where(_.lastName === s"Tolkien$n").head
           val lord_of_the_rings = new Book("The Lord of the Rings", jrrt.id)
           books.insert(lord_of_the_rings)
@@ -101,9 +101,9 @@ object SquerylBenchMark extends App {
         1 to 100 foreach { n =>
           val jrrt = authors.where(_.lastName === s"Tolkien$n").head
           jrrt.books.map(_.title).mkString(",")
-          authors.map(_.full_name).mkString(",")
-          books.filter(_.title.contains("Dark")).map(_.title).mkString(",")
-          authors.find(_.lastName == "Pullmann").foreach(a => println(a.full_content))
+          authors.allRows.map(_.full_name).mkString(",")
+          books.where(_.title like ("Dark")).map(_.title).mkString(",")
+          authors.where(_.lastName === "Pullmann").foreach(a => println(a.full_content))
         }
       })
     }

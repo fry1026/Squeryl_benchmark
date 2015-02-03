@@ -2,7 +2,7 @@ name := "Scala IntelliJ Template with SBT"
 
 version := "0.1.0"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.5"
 
 mainClass := Some("Hello")
 
@@ -12,7 +12,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies  ++=  Seq(
-  "org.squeryl" %% "squeryl" % "0.9.5-6",
+  "org.squeryl" %% "squeryl" % "0.9.6+",
   "org.postgresql" % "postgresql" % "9.3-1101-jdbc41",
   "com.h2database" % "h2" % "1.2.127"
 )
