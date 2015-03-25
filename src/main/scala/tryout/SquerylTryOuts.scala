@@ -109,7 +109,7 @@ object Domain2 extends org.squeryl.PrimitiveTypeMode {
     }
 
     override def callbacks = Seq(
-      afterInsert[Address]
+      beforeInsert[Address]
         map { a => validate(a) match {
         case Success => a
         case Failure(m) => println(m);a
