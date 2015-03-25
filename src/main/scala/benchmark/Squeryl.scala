@@ -1,31 +1,33 @@
+//import _root_.Domain.Author
+package benchmark
+
 import org.squeryl._
-import adapters.{H2Adapter, PostgreSqlAdapter}
-import org.squeryl.dsl.{CompositeKey2, ManyToOne, OneToMany}
-import PrimitiveTypeMode._
+import org.squeryl.adapters.PostgreSqlAdapter
+import org.squeryl.dsl._
+//import PrimitiveTypeMode._
 import java.sql.Timestamp
 
-object Domain {
+object Domain extends org.squeryl.PrimitiveTypeMode{
 
   class DbObject extends KeyedEntity[Long] {
     val id: Long = 0
     val last_update = new Timestamp(System.currentTimeMillis())
   }
 
-  case class Award(val name: String) extends DbObject
+  case class Award(var name: String) extends DbObject
 
-  class Author(val firstName: String,
-               val lastName: String,
-               val email: Option[String] = None,
-               val full_content: Option[String] = None) extends DbObject {
+  case class Author(var firstName: String,
+               var lastName: String,
+               var email: Option[String] = None,
+               var full_content: Option[String] = None) extends DbObject {
     lazy val books: OneToMany[Book] = SquerylConfiguration.booksToAuthors.left(this)
     lazy val awards = SquerylConfiguration.awardPresentations.right(this)
     lazy val full_name = s"$firstName $lastName"
   }
 
-  class Book(val title: String, val authorId: Long, val read: Boolean = false) extends DbObject {
+  case class Book(var title: String, var authorId: Long, var read: Boolean = false) extends DbObject {
     lazy val author: ManyToOne[Author] = SquerylConfiguration.booksToAuthors.right(this)
   }
-
   class AwardPresentation(val award_id: Long, val author_id: Long) extends KeyedEntity[CompositeKey2[Long, Long]] {
     def id = compositeKey(award_id, author_id)
   }
@@ -55,9 +57,9 @@ object Benchmarking {
   }
 }
 
-import Domain._
-import SquerylConfiguration._
-import Benchmarking._
+import benchmark.Benchmarking._
+import benchmark.Domain.SquerylConfiguration._
+import benchmark.Domain._
 
 object SquerylBenchMark extends App {
   //Class.forName("org.h2.Driver")
@@ -71,12 +73,12 @@ object SquerylBenchMark extends App {
     // Benchmarking insert
     inTransaction {
       time("insert statements", {
-        1 to 1000 foreach { n =>
+        1 to 50 foreach { n =>
           val jrrt = authors.insert(new Author("JRR", s"Tolkien$n"))
           authors.insert(new Author("Jane", "Austen"))
           authors.insert(new Author("Philip", "Pullman", None, Some( """ <xml>Test</xml> """)))
         }
-        1 to 1000 foreach { n =>
+        1 to 50 foreach { n =>
           val jrrt = authors.where(_.lastName === s"Tolkien$n").head
           val lord_of_the_rings = new Book("The Lord of the Rings", jrrt.id)
           books.insert(lord_of_the_rings)
@@ -98,7 +100,7 @@ object SquerylBenchMark extends App {
     inTransaction {
       println(s"Number of authors in database: ${from(books)(select(_)).size}")
       time("select statements", {
-        1 to 100 foreach { n =>
+        1 to 50 foreach { n =>
           val jrrt = authors.where(_.lastName === s"Tolkien$n").head
           jrrt.books.map(_.title).mkString(",")
           authors.allRows.map(_.full_name).mkString(",")

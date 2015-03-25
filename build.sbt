@@ -14,7 +14,7 @@ resolvers ++= Seq(
 libraryDependencies  ++=  Seq(
   "org.squeryl" %% "squeryl" % "0.9.6+",
   "org.postgresql" % "postgresql" % "9.3-1101-jdbc41",
-  "com.h2database" % "h2" % "1.2.127"
+  "com.h2database" % "h2" % "1.2.127",
+  "com.github.nscala-time" %% "nscala-time" % "1.8.0",
+  "com.wix" %% "accord-core" % "0.4.1"
 )
-
-// libraryDependencies += "com.github.nscala-time" %% "nscala-time" % "0.4.2" // sample library
